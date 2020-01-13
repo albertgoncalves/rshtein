@@ -3,4 +3,7 @@ name = "rshtein"
 version = "0.1.0"
 edition = "2018"
 
-[dependencies]
+[profile.release]
+codegen-units = 1
+debug = false
+panic = "abort"

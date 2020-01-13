@@ -24,8 +24,11 @@ PATH="$PATH:$CARGO_HOME/bin"
 if [ ! -f .init ]; then
     rustup install stable
     rustup default stable
-    rustup component add rustfmt
     rustup component add clippy
+    rustup component add rustfmt
+    rustup toolchain install nightly
+    rustup component add rustfmt --toolchain nightly
+    rustup component add clippy --toolchain nightly
     touch .init
 fi
 
@@ -33,7 +36,10 @@ rustup update
 
 export RUSTFLAGS="-C target-cpu=native"
 
-alias rustfmt="rustfmt -v"
-alias clippy="cargo clippy -- -D warnings -W clippy::pedantic"
+alias rustfmt="rustup run nightly rustfmt -v"
+alias \
+    clippy="rustup run nightly cargo clippy -- -D warnings -W clippy::pedantic"
+alias nighttest="rustup run nightly cargo test --lib"
+alias nightbench="rustup run nightly cargo bench"
 
 set +e
