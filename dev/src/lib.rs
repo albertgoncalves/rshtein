@@ -1,8 +1,10 @@
 #![feature(test)]
 
-/* NOTE: _.as_bytes() is fine as long as the given strings only contain
- * symbols between U+0000 and U+007F.
+/* NOTE: _.as_bytes() is fine as long as the given strings only contain symbols
+ * between U+0000 and U+007F.
  */
+
+use arrayvec::ArrayVec;
 
 #[must_use]
 pub fn lev_rec(a: &[u8], b: &[u8], i: usize, j: usize) -> usize {
@@ -25,13 +27,17 @@ pub fn lev_rec(a: &[u8], b: &[u8], i: usize, j: usize) -> usize {
 }
 
 #[must_use]
-pub fn lev_recursive(a: &[u8], b: &[u8]) -> usize {
+pub fn lev_recursive(a: &str, b: &str) -> usize {
+    let a: &[u8] = a.as_bytes();
+    let b: &[u8] = b.as_bytes();
     lev_rec(a, b, a.len(), b.len())
 }
 
 #[must_use]
 #[allow(clippy::needless_range_loop)]
-pub fn lev_2d_vec(a: &[u8], b: &[u8]) -> usize {
+pub fn lev_2d_vec(a: &str, b: &str) -> usize {
+    let a: &[u8] = a.as_bytes();
+    let b: &[u8] = b.as_bytes();
     let height: usize = a.len() + 1;
     let width: usize = b.len() + 1;
     let mut matrix: Vec<Vec<usize>> = vec![vec![0; width]; height];
@@ -60,7 +66,9 @@ pub fn lev_2d_vec(a: &[u8], b: &[u8]) -> usize {
 
 #[must_use]
 #[allow(clippy::needless_range_loop)]
-pub fn lev_1d_vec(a: &[u8], b: &[u8]) -> usize {
+pub fn lev_1d_vec(a: &str, b: &str) -> usize {
+    let a: &[u8] = a.as_bytes();
+    let b: &[u8] = b.as_bytes();
     let height: usize = a.len() + 1;
     let width: usize = b.len() + 1;
     let mut matrix: Vec<usize> = vec![0; height * width];
@@ -92,6 +100,89 @@ pub fn lev_1d_vec(a: &[u8], b: &[u8]) -> usize {
     *matrix.last().unwrap()
 }
 
+const CAPACITY: usize = 512;
+
+#[must_use]
+#[allow(clippy::needless_range_loop)]
+pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
+    let a: &[u8] = a.as_bytes();
+    let b: &[u8] = b.as_bytes();
+    let height: usize = a.len() + 1;
+    let width: usize = b.len() + 1;
+    let mut matrix: ArrayVec<[usize; CAPACITY]> = ArrayVec::new();
+    for _ in 0..(height * width) {
+        matrix.push(0);
+    }
+    macro_rules! select {
+        ($j:expr, $i:expr $(,)?) => {
+            $j + ($i * width)
+        };
+    }
+    for i in 1..height {
+        matrix[i * width] = i;
+    }
+    for j in 1..width {
+        matrix[j] = j;
+    }
+    for j in 1..width {
+        for i in 1..height {
+            let penalty: usize = {
+                if a[i - 1] == b[j - 1] {
+                    0
+                } else {
+                    1
+                }
+            };
+            matrix[select!(j, i)] = (matrix[select!(j, i - 1)] + 1)
+                .min(matrix[select!(j - 1, i)] + 1)
+                .min(matrix[select!(j - 1, i - 1)] + penalty);
+        }
+    }
+    *matrix.last().unwrap()
+}
+
+#[must_use]
+#[allow(clippy::missing_safety_doc, clippy::needless_range_loop)]
+pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
+    let a: &[u8] = a.as_bytes();
+    let b: &[u8] = b.as_bytes();
+    let height: usize = a.len() + 1;
+    let width: usize = b.len() + 1;
+    let n: usize = height * width;
+    assert!(n < CAPACITY);
+    let mut matrix: ArrayVec<[usize; CAPACITY]> = ArrayVec::new();
+    for _ in 0..n {
+        matrix.push_unchecked(0);
+    }
+    macro_rules! select {
+        ($j:expr, $i:expr $(,)?) => {
+            $j + ($i * width)
+        };
+    }
+    for i in 1..height {
+        matrix[i * width] = i;
+    }
+    for j in 1..width {
+        matrix[j] = j;
+    }
+    for j in 1..width {
+        for i in 1..height {
+            let penalty: usize = {
+                if a[i - 1] == b[j - 1] {
+                    0
+                } else {
+                    1
+                }
+            };
+            matrix[select!(j, i)] = (matrix.get_unchecked(select!(j, i - 1))
+                + 1)
+            .min(matrix.get_unchecked(select!(j - 1, i)) + 1)
+            .min(matrix.get_unchecked(select!(j - 1, i - 1)) + penalty);
+        }
+    }
+    *matrix.last().unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     extern crate test;
@@ -101,16 +192,16 @@ mod tests {
 
     macro_rules! test_cases {
         ($f:expr $(,)?) => {{
-            assert_eq!($f("sitting".as_bytes(), "kitten".as_bytes()), 3);
-            assert_eq!($f("flaw".as_bytes(), "lawn".as_bytes()), 2);
-            assert_eq!($f("saturday".as_bytes(), "sunday".as_bytes()), 3);
-            assert_eq!($f("gumbo".as_bytes(), "gambol".as_bytes()), 2)
+            assert_eq!($f("sitting", "kitten"), 3);
+            assert_eq!($f("flaw", "lawn"), 2);
+            assert_eq!($f("saturday", "sunday"), 3);
+            assert_eq!($f("gumbo", "gambol"), 2)
         }};
     }
 
     macro_rules! bench_case {
         ($b:expr, $f:expr $(,)?) => {
-            $b.iter(|| $f("sitting".as_bytes(), "kitten".as_bytes()))
+            $b.iter(|| $f("sitting", "kitten"))
         };
     }
 
@@ -142,5 +233,25 @@ mod tests {
     #[bench]
     fn bench_lev_1d_vec(b: &mut Bencher) {
         bench_case!(b, lev_1d_vec)
+    }
+
+    #[test]
+    fn test_lev_1d_arrayvec() {
+        test_cases!(lev_1d_arrayvec)
+    }
+
+    #[bench]
+    fn bench_lev_1d_arrayvec(b: &mut Bencher) {
+        bench_case!(b, lev_1d_arrayvec)
+    }
+
+    #[test]
+    fn test_lev_1d_arrayvec_unsafe() {
+        unsafe { test_cases!(lev_1d_arrayvec_unsafe) }
+    }
+
+    #[bench]
+    fn bench_lev_1d_arrayvec_unsafe(b: &mut Bencher) {
+        unsafe { bench_case!(b, lev_1d_arrayvec_unsafe) }
     }
 }
