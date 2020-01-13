@@ -5,7 +5,7 @@
  */
 
 #[must_use]
-pub fn lev_recursive(a: &[u8], b: &[u8], i: usize, j: usize) -> usize {
+pub fn lev_rec(a: &[u8], b: &[u8], i: usize, j: usize) -> usize {
     if i == 0 {
         j
     } else if j == 0 {
@@ -18,10 +18,15 @@ pub fn lev_recursive(a: &[u8], b: &[u8], i: usize, j: usize) -> usize {
                 1
             }
         };
-        (lev_recursive(a, b, i - 1, j) + 1)
-            .min(lev_recursive(a, b, i, j - 1) + 1)
-            .min(lev_recursive(a, b, i - 1, j - 1) + penalty)
+        (lev_rec(a, b, i - 1, j) + 1)
+            .min(lev_rec(a, b, i, j - 1) + 1)
+            .min(lev_rec(a, b, i - 1, j - 1) + penalty)
     }
+}
+
+#[must_use]
+pub fn lev_recursive(a: &[u8], b: &[u8]) -> usize {
+    lev_rec(a, b, a.len(), b.len())
 }
 
 #[must_use]
@@ -94,50 +99,48 @@ mod tests {
     use super::*;
     use test::Bencher;
 
-    macro_rules! lev_recursive {
-        ($a:expr, $b:expr $(,)?) => {{
-            let a: &[u8] = $a.as_bytes();
-            let b: &[u8] = $b.as_bytes();
-            lev_recursive(a, b, a.len(), b.len())
+    macro_rules! test_cases {
+        ($f:expr $(,)?) => {{
+            assert_eq!($f("sitting".as_bytes(), "kitten".as_bytes()), 3);
+            assert_eq!($f("flaw".as_bytes(), "lawn".as_bytes()), 2);
+            assert_eq!($f("saturday".as_bytes(), "sunday".as_bytes()), 3);
+            assert_eq!($f("gumbo".as_bytes(), "gambol".as_bytes()), 2)
         }};
+    }
+
+    macro_rules! bench_case {
+        ($b:expr, $f:expr $(,)?) => {
+            $b.iter(|| $f("sitting".as_bytes(), "kitten".as_bytes()))
+        };
     }
 
     #[test]
     fn test_lev_recursive() {
-        assert!(lev_recursive!("sitting", "kitten") == 3);
-        assert!(lev_recursive!("flaw", "lawn") == 2);
-        assert!(lev_recursive!("saturday", "sunday") == 3);
-        assert!(lev_recursive!("gumbo", "gambol") == 2)
+        test_cases!(lev_recursive)
     }
 
     #[bench]
     fn bench_lev_recursive(b: &mut Bencher) {
-        b.iter(|| lev_recursive!("sitting", "kitten"))
+        bench_case!(b, lev_recursive)
     }
 
     #[test]
     fn test_lev_2d_vec() {
-        assert!(lev_2d_vec("sitting".as_bytes(), "kitten".as_bytes()) == 3);
-        assert!(lev_2d_vec("flaw".as_bytes(), "lawn".as_bytes()) == 2);
-        assert!(lev_2d_vec("saturday".as_bytes(), "sunday".as_bytes()) == 3);
-        assert!(lev_2d_vec("gumbo".as_bytes(), "gambol".as_bytes()) == 2)
+        test_cases!(lev_2d_vec)
     }
 
     #[bench]
     fn bench_lev_2d_vec(b: &mut Bencher) {
-        b.iter(|| lev_2d_vec("sitting".as_bytes(), "kitten".as_bytes()))
+        bench_case!(b, lev_2d_vec)
     }
 
     #[test]
     fn test_lev_1d_vec() {
-        assert!(lev_1d_vec("sitting".as_bytes(), "kitten".as_bytes()) == 3);
-        assert!(lev_1d_vec("flaw".as_bytes(), "lawn".as_bytes()) == 2);
-        assert!(lev_1d_vec("saturday".as_bytes(), "sunday".as_bytes()) == 3);
-        assert!(lev_1d_vec("gumbo".as_bytes(), "gambol".as_bytes()) == 2)
+        test_cases!(lev_1d_vec)
     }
 
     #[bench]
     fn bench_lev_1d_vec(b: &mut Bencher) {
-        b.iter(|| lev_1d_vec("sitting".as_bytes(), "kitten".as_bytes()))
+        bench_case!(b, lev_1d_vec)
     }
 }
