@@ -62,7 +62,7 @@ pub fn lev_2d_vec(a: &str, b: &str) -> usize {
                 .min(matrix[i - 1][j - 1] + penalty);
         }
     }
-    *matrix.last().unwrap().last().unwrap()
+    matrix[height - 1][width - 1]
 }
 
 #[must_use]
@@ -72,7 +72,8 @@ pub fn lev_1d_vec(a: &str, b: &str) -> usize {
     let b: &[u8] = b.as_bytes();
     let height: usize = a.len() + 1;
     let width: usize = b.len() + 1;
-    let mut matrix: Vec<usize> = vec![0; height * width];
+    let n: usize = height * width;
+    let mut matrix: Vec<usize> = vec![0; n];
     macro_rules! select {
         ($j:expr, $i:expr $(,)?) => {
             $j + ($i * width)
@@ -98,7 +99,7 @@ pub fn lev_1d_vec(a: &str, b: &str) -> usize {
                 .min(matrix[select!(j - 1, i - 1)] + penalty);
         }
     }
-    *matrix.last().unwrap()
+    matrix[n - 1]
 }
 
 const CAPACITY: usize = 4096;
@@ -110,8 +111,16 @@ pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
     let b: &[u8] = b.as_bytes();
     let height: usize = a.len() + 1;
     let width: usize = b.len() + 1;
+    let n: usize = height * width;
+    /* NOTE: With small inputs, this means of initialization will allow the
+     * `ArrayVec` implementations to beat `lev_1d_vec`. As input size grows,
+     * this operation falls behind `lev_1d_vec`'s `vec![...]`.  Initializing
+     * `matrix` via `...from([0; CAPACITY])` seems to cause the implementations
+     * to trade places: `ArrayVec` now wins for large inputs, `Vec` for small
+     * inputs.
+     */
     let mut matrix: ArrayVec<[usize; CAPACITY]> = ArrayVec::new();
-    for _ in 0..(height * width) {
+    for _ in 0..n {
         matrix.push(0);
     }
     macro_rules! select {
@@ -139,7 +148,7 @@ pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
                 .min(matrix[select!(j - 1, i - 1)] + penalty);
         }
     }
-    *matrix.last().unwrap()
+    matrix[n - 1]
 }
 
 #[must_use]
@@ -182,7 +191,7 @@ pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
             .min(matrix.get_unchecked(select!(j - 1, i - 1)) + penalty);
         }
     }
-    *matrix.last().unwrap()
+    matrix[n - 1]
 }
 
 #[cfg(test)]
@@ -240,7 +249,7 @@ mod tests {
         };
     }
 
-    /* NOTE: `lev_recursive` is too slow for the given benchmark. */
+    /* NOTE: `lev_recursive` is too slow for the target benchmark. */
     #[test]
     fn test_lev_recursive() {
         test_cases!(lev_recursive)
