@@ -1,6 +1,7 @@
 #![feature(test)]
 
 use arrayvec::ArrayVec;
+use unchecked_index::{unchecked_index, UncheckedIndex};
 
 /* NOTE: _.as_bytes() is fine as long as the given strings only contain symbols
  * between U+0000 and U+007F.
@@ -100,7 +101,7 @@ pub fn lev_1d_vec(a: &str, b: &str) -> usize {
     *matrix.last().unwrap()
 }
 
-const CAPACITY: usize = 512;
+const CAPACITY: usize = 4096;
 
 #[must_use]
 #[allow(clippy::needless_range_loop)]
@@ -150,7 +151,8 @@ pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
     let width: usize = b.len() + 1;
     let n: usize = height * width;
     assert!(n < CAPACITY);
-    let mut matrix: ArrayVec<[usize; CAPACITY]> = ArrayVec::new();
+    let mut matrix: UncheckedIndex<ArrayVec<[usize; CAPACITY]>> =
+        unchecked_index(ArrayVec::new());
     for _ in 0..n {
         matrix.push_unchecked(0);
     }
@@ -201,7 +203,12 @@ mod tests {
 
     macro_rules! bench_case {
         ($b:expr, $fn:expr $(,)?) => {
-            $b.iter(|| $fn("sitting", "kitten"))
+            $b.iter(|| {
+                $fn(
+                    "the quick brown fox jumps over the lazy dog",
+                    "pack my box with five dozen liquor jugs",
+                )
+            })
         };
     }
 
@@ -233,7 +240,12 @@ mod tests {
         };
     }
 
-    test_and_bench!(lev_recursive, test_lev_recursive, bench_lev_recursive);
+    /* NOTE: `lev_recursive` is too slow to benchmark with the given input. */
+    #[test]
+    fn test_lev_recursive() {
+        test_cases!(lev_recursive)
+    }
+
     test_and_bench!(lev_2d_vec, test_lev_2d_vec, bench_lev_2d_vec);
     test_and_bench!(lev_1d_vec, test_lev_1d_vec, bench_lev_1d_vec);
     test_and_bench!(

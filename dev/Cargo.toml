@@ -10,3 +10,4 @@ panic = "abort"
 
 [dependencies]
 arrayvec = "0.5.1"
+unchecked-index = "0.2.2"
