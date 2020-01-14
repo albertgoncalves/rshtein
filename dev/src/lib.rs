@@ -240,7 +240,7 @@ mod tests {
         };
     }
 
-    /* NOTE: `lev_recursive` is too slow to benchmark with the given input. */
+    /* NOTE: `lev_recursive` is too slow for the given benchmark. */
     #[test]
     fn test_lev_recursive() {
         test_cases!(lev_recursive)
