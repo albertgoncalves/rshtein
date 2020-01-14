@@ -61,7 +61,7 @@ pub fn lev_2d_vec(a: &str, b: &str) -> usize {
                 .min(matrix[i - 1][j - 1] + penalty);
         }
     }
-    matrix[height - 1][width - 1]
+    *matrix.last().unwrap().last().unwrap()
 }
 
 #[must_use]
