@@ -1,10 +1,10 @@
 #![feature(test)]
 
+use arrayvec::ArrayVec;
+
 /* NOTE: _.as_bytes() is fine as long as the given strings only contain symbols
  * between U+0000 and U+007F.
  */
-
-use arrayvec::ArrayVec;
 
 #[must_use]
 pub fn lev_rec(a: &[u8], b: &[u8], i: usize, j: usize) -> usize {
@@ -191,67 +191,59 @@ mod tests {
     use test::Bencher;
 
     macro_rules! test_cases {
-        ($f:expr $(,)?) => {{
-            assert_eq!($f("sitting", "kitten"), 3);
-            assert_eq!($f("flaw", "lawn"), 2);
-            assert_eq!($f("saturday", "sunday"), 3);
-            assert_eq!($f("gumbo", "gambol"), 2)
+        ($fn:expr $(,)?) => {{
+            assert_eq!($fn("sitting", "kitten"), 3);
+            assert_eq!($fn("flaw", "lawn"), 2);
+            assert_eq!($fn("saturday", "sunday"), 3);
+            assert_eq!($fn("gumbo", "gambol"), 2)
         }};
     }
 
     macro_rules! bench_case {
-        ($b:expr, $f:expr $(,)?) => {
-            $b.iter(|| $f("sitting", "kitten"))
+        ($b:expr, $fn:expr $(,)?) => {
+            $b.iter(|| $fn("sitting", "kitten"))
         };
     }
 
-    #[test]
-    fn test_lev_recursive() {
-        test_cases!(lev_recursive)
+    macro_rules! test_and_bench {
+        ($fn:expr, $test:ident, $bench:ident $(,)?) => {
+            #[test]
+            fn $test() {
+                test_cases!($fn)
+            }
+
+            #[bench]
+            fn $bench(b: &mut Bencher) {
+                bench_case!(b, $fn)
+            }
+        };
     }
 
-    #[bench]
-    fn bench_lev_recursive(b: &mut Bencher) {
-        bench_case!(b, lev_recursive)
+    macro_rules! test_and_bench_unsafe {
+        ($fn:expr, $test:ident, $bench:ident $(,)?) => {
+            #[test]
+            fn $test() {
+                unsafe { test_cases!($fn) }
+            }
+
+            #[bench]
+            fn $bench(b: &mut Bencher) {
+                unsafe { bench_case!(b, $fn) }
+            }
+        };
     }
 
-    #[test]
-    fn test_lev_2d_vec() {
-        test_cases!(lev_2d_vec)
-    }
-
-    #[bench]
-    fn bench_lev_2d_vec(b: &mut Bencher) {
-        bench_case!(b, lev_2d_vec)
-    }
-
-    #[test]
-    fn test_lev_1d_vec() {
-        test_cases!(lev_1d_vec)
-    }
-
-    #[bench]
-    fn bench_lev_1d_vec(b: &mut Bencher) {
-        bench_case!(b, lev_1d_vec)
-    }
-
-    #[test]
-    fn test_lev_1d_arrayvec() {
-        test_cases!(lev_1d_arrayvec)
-    }
-
-    #[bench]
-    fn bench_lev_1d_arrayvec(b: &mut Bencher) {
-        bench_case!(b, lev_1d_arrayvec)
-    }
-
-    #[test]
-    fn test_lev_1d_arrayvec_unsafe() {
-        unsafe { test_cases!(lev_1d_arrayvec_unsafe) }
-    }
-
-    #[bench]
-    fn bench_lev_1d_arrayvec_unsafe(b: &mut Bencher) {
-        unsafe { bench_case!(b, lev_1d_arrayvec_unsafe) }
-    }
+    test_and_bench!(lev_recursive, test_lev_recursive, bench_lev_recursive);
+    test_and_bench!(lev_2d_vec, test_lev_2d_vec, bench_lev_2d_vec);
+    test_and_bench!(lev_1d_vec, test_lev_1d_vec, bench_lev_1d_vec);
+    test_and_bench!(
+        lev_1d_arrayvec,
+        test_lev_1d_arrayvec,
+        bench_lev_1d_arrayvec,
+    );
+    test_and_bench_unsafe!(
+        lev_1d_arrayvec_unsafe,
+        test_lev_1d_arrayvec_unsafe,
+        bench_lev_1d_arrayvec_unsafe,
+    );
 }
