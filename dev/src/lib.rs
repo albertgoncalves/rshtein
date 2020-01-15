@@ -245,10 +245,11 @@ pub unsafe fn lev_1d_array_unsafe(a: &str, b: &str) -> usize {
                     1
                 }
             };
-            matrix[select!(j, i)] = (matrix.get_unchecked(select!(j, i - 1))
-                + 1)
-            .min(matrix.get_unchecked(select!(j - 1, i)) + 1)
-            .min(matrix.get_unchecked(select!(j - 1, i - 1)) + penalty);
+            matrix[select!(j, i)] = {
+                (matrix.get_unchecked(select!(j, i - 1)) + 1)
+                    .min(matrix.get_unchecked(select!(j - 1, i)) + 1)
+                    .min(matrix.get_unchecked(select!(j - 1, i - 1)) + penalty)
+            };
         }
     }
     matrix[n - 1]
