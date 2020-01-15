@@ -174,8 +174,11 @@ pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
             let value: usize = (matrix.get_unchecked(select!(j, i - 1)) + 1)
                 .min(matrix.get_unchecked(select!(j - 1, i)) + 1)
                 .min(matrix.get_unchecked(select!(j - 1, i - 1)) + penalty);
-            /* NOTE: `push_unchecked` here is *slower*. Why? How? */
-            matrix.push(value);
+            /* NOTE: This last `push_unchecked` has a *negative* performance
+             * impact on `Darwin`. Is this a bug? On `Linux` this provides a
+             * small but consistent speed increase.
+             */
+            matrix.push_unchecked(value);
         }
     }
     matrix[n - 1]
