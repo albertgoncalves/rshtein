@@ -270,7 +270,9 @@ mod tests {
             assert_eq!($fn("sitting", "kitten"), 3);
             assert_eq!($fn("flaw", "lawn"), 2);
             assert_eq!($fn("saturday", "sunday"), 3);
-            assert_eq!($fn("gumbo", "gambol"), 2)
+            assert_eq!($fn("gumbo", "gambol"), 2);
+            assert_eq!($fn("book", "back"), 2);
+            assert_eq!($fn("edward", "edwin"), 3);
         }};
     }
 
