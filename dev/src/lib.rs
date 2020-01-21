@@ -3,7 +3,8 @@
 use arrayvec::ArrayVec;
 use unchecked_index::{unchecked_index, UncheckedIndex};
 
-const CAPACITY: usize = 4096;
+const CAP_1D: usize = 256;
+const CAP_2D: usize = 4096;
 
 /* NOTE: _.as_bytes() is fine as long as the given strings only contain symbols
  * between U+0000 and U+007F.
@@ -104,6 +105,57 @@ pub fn lev_1d_vec(a: &str, b: &str) -> usize {
     matrix[n - 1]
 }
 
+/* NOTE: https://github.com/crystal-lang/crystal/blob/41bd18fbea4aec50aad33aa3beb7a0bf30544186/src/levenshtein.cr#L13
+ */
+#[must_use]
+#[allow(clippy::needless_range_loop)]
+pub fn lev_1d_vec_min(a: &str, b: &str) -> usize {
+    let a: &[u8] = a.as_bytes();
+    let b: &[u8] = b.as_bytes();
+    let a_len: usize = a.len();
+    let b_len: usize = b.len();
+    if a_len == 0 {
+        return b_len;
+    } else if b_len == 0 {
+        return a_len;
+    }
+    let (a, b, a_len, b_len, mut matrix): (
+        &[u8],
+        &[u8],
+        usize,
+        usize,
+        Vec<usize>,
+    ) = {
+        if a_len < b_len {
+            (a, b, a_len, b_len, vec![0; b_len + 1])
+        } else {
+            (b, a, b_len, a_len, vec![0; a_len + 1])
+        }
+    };
+    for j in 0..b_len {
+        matrix[j] = j;
+    }
+    for i in 0..a_len {
+        let mut last_cost = i + 1;
+        for j in 0..b_len {
+            let sub_cost: usize = {
+                if a[i] == b[j] {
+                    0
+                } else {
+                    1
+                }
+            };
+            let cost: usize = (last_cost + 1)
+                .min(matrix[j + 1] + 1)
+                .min(matrix[j] + sub_cost);
+            matrix[j] = last_cost;
+            last_cost = cost
+        }
+        matrix[b_len] = last_cost
+    }
+    matrix[b_len]
+}
+
 #[must_use]
 #[allow(clippy::needless_range_loop)]
 pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
@@ -112,7 +164,7 @@ pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
     let height: usize = a.len() + 1;
     let width: usize = b.len() + 1;
     let n: usize = height * width;
-    let mut matrix: ArrayVec<[usize; CAPACITY]> = ArrayVec::new();
+    let mut matrix: ArrayVec<[usize; CAP_2D]> = ArrayVec::new();
     macro_rules! select {
         ($j:expr, $i:expr $(,)?) => {
             $j + ($i * width)
@@ -142,6 +194,55 @@ pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
+#[allow(clippy::needless_range_loop)]
+pub fn lev_1d_arrayvec_min(a: &str, b: &str) -> usize {
+    let a: &[u8] = a.as_bytes();
+    let b: &[u8] = b.as_bytes();
+    let a_len: usize = a.len();
+    let b_len: usize = b.len();
+    if a_len == 0 {
+        return b_len;
+    } else if b_len == 0 {
+        return a_len;
+    }
+    let (a, b, a_len, b_len, mut matrix): (
+        &[u8],
+        &[u8],
+        usize,
+        usize,
+        ArrayVec<[usize; CAP_1D]>,
+    ) = {
+        if a_len < b_len {
+            (a, b, a_len, b_len, ArrayVec::new())
+        } else {
+            (b, a, b_len, a_len, ArrayVec::new())
+        }
+    };
+    for j in 0..=b_len {
+        matrix.push(j);
+    }
+    for i in 0..a_len {
+        let mut last_cost = i + 1;
+        for j in 0..b_len {
+            let sub_cost: usize = {
+                if a[i] == b[j] {
+                    0
+                } else {
+                    1
+                }
+            };
+            let cost: usize = (last_cost + 1)
+                .min(matrix[j + 1] + 1)
+                .min(matrix[j] + sub_cost);
+            matrix[j] = last_cost;
+            last_cost = cost
+        }
+        matrix[b_len] = last_cost
+    }
+    matrix[b_len]
+}
+
+#[must_use]
 #[allow(clippy::missing_safety_doc, clippy::needless_range_loop)]
 pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
@@ -149,8 +250,8 @@ pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
     let height: usize = a.len() + 1;
     let width: usize = b.len() + 1;
     let n: usize = height * width;
-    assert!(n < CAPACITY);
-    let mut matrix: UncheckedIndex<ArrayVec<[usize; CAPACITY]>> =
+    assert!(n < CAP_2D);
+    let mut matrix: UncheckedIndex<ArrayVec<[usize; CAP_2D]>> =
         unchecked_index(ArrayVec::new());
     macro_rules! select {
         ($j:expr, $i:expr $(,)?) => {
@@ -192,7 +293,7 @@ pub fn lev_1d_array(a: &str, b: &str) -> usize {
     let height: usize = a.len() + 1;
     let width: usize = b.len() + 1;
     let n: usize = height * width;
-    let mut matrix: [usize; CAPACITY] = [0; CAPACITY];
+    let mut matrix: [usize; CAP_2D] = [0; CAP_2D];
     macro_rules! select {
         ($j:expr, $i:expr $(,)?) => {
             $j + ($i * width)
@@ -227,9 +328,9 @@ pub unsafe fn lev_1d_array_unsafe(a: &str, b: &str) -> usize {
     let height: usize = a.len() + 1;
     let width: usize = b.len() + 1;
     let n: usize = height * width;
-    assert!(n < CAPACITY);
-    let mut matrix: UncheckedIndex<[usize; CAPACITY]> =
-        unchecked_index([0; CAPACITY]);
+    assert!(n < CAP_2D);
+    let mut matrix: UncheckedIndex<[usize; CAP_2D]> =
+        unchecked_index([0; CAP_2D]);
     macro_rules! select {
         ($j:expr, $i:expr $(,)?) => {
             $j + ($i * width)
@@ -265,14 +366,22 @@ mod tests {
     use super::*;
     use test::Bencher;
 
+    macro_rules! both_ways {
+        ($fn:expr, $a:expr, $b:expr, $v:expr $(,)?) => {
+            assert_eq!($fn($a, $b), $v);
+            assert_eq!($fn($b, $a), $v);
+        };
+    }
+
     macro_rules! test_cases {
         ($fn:expr $(,)?) => {{
-            assert_eq!($fn("sitting", "kitten"), 3);
-            assert_eq!($fn("flaw", "lawn"), 2);
-            assert_eq!($fn("saturday", "sunday"), 3);
-            assert_eq!($fn("gumbo", "gambol"), 2);
-            assert_eq!($fn("book", "back"), 2);
-            assert_eq!($fn("edward", "edwin"), 3);
+            both_ways!($fn, "foobar", "", 6);
+            both_ways!($fn, "sitting", "kitten", 3);
+            both_ways!($fn, "flaw", "lawn", 2);
+            both_ways!($fn, "saturday", "sunday", 3);
+            both_ways!($fn, "gumbo", "gambol", 2);
+            both_ways!($fn, "book", "back", 2);
+            both_ways!($fn, "edward", "edwin", 3);
         }};
     }
 
@@ -360,10 +469,22 @@ mod tests {
         bench_lev_1d_vec_long,
     );
     test_and_bench!(
+        lev_1d_vec_min,
+        test_lev_1d_vec_min,
+        bench_lev_1d_vec_min_short,
+        bench_lev_1d_vec_min_long,
+    );
+    test_and_bench!(
         lev_1d_arrayvec,
         test_lev_1d_arrayvec,
         bench_lev_1d_arrayvec_short,
         bench_lev_1d_arrayvec_long,
+    );
+    test_and_bench!(
+        lev_1d_arrayvec_min,
+        test_lev_1d_arrayvec_min,
+        bench_lev_1d_arrayvec_min_short,
+        bench_lev_1d_arrayvec_min_long,
     );
     test_and_bench_unsafe!(
         lev_1d_arrayvec_unsafe,
