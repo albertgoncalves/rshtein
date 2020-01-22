@@ -136,22 +136,22 @@ pub fn lev_1d_vec_min(a: &str, b: &str) -> usize {
         matrix[j] = j;
     }
     for i in 0..a_len {
-        let mut last_cost = i + 1;
+        let mut last_penalty = i + 1;
         for j in 0..b_len {
-            let sub_cost: usize = {
+            let sub_penalty: usize = {
                 if a[i] == b[j] {
                     0
                 } else {
                     1
                 }
             };
-            let cost: usize = (last_cost + 1)
+            let penalty: usize = (last_penalty + 1)
                 .min(matrix[j + 1] + 1)
-                .min(matrix[j] + sub_cost);
-            matrix[j] = last_cost;
-            last_cost = cost
+                .min(matrix[j] + sub_penalty);
+            matrix[j] = last_penalty;
+            last_penalty = penalty
         }
-        matrix[b_len] = last_cost
+        matrix[b_len] = last_penalty
     }
     matrix[b_len]
 }
@@ -222,22 +222,22 @@ pub fn lev_1d_arrayvec_min(a: &str, b: &str) -> usize {
         matrix.push(j);
     }
     for i in 0..a_len {
-        let mut last_cost = i + 1;
+        let mut last_penalty = i + 1;
         for j in 0..b_len {
-            let sub_cost: usize = {
+            let sub_penalty: usize = {
                 if a[i] == b[j] {
                     0
                 } else {
                     1
                 }
             };
-            let cost: usize = (last_cost + 1)
+            let penalty: usize = (last_penalty + 1)
                 .min(matrix[j + 1] + 1)
-                .min(matrix[j] + sub_cost);
-            matrix[j] = last_cost;
-            last_cost = cost
+                .min(matrix[j] + sub_penalty);
+            matrix[j] = last_penalty;
+            last_penalty = penalty
         }
-        matrix[b_len] = last_cost
+        matrix[b_len] = last_penalty
     }
     matrix[b_len]
 }
