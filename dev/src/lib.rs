@@ -112,48 +112,48 @@ pub fn lev_1d_vec(a: &str, b: &str) -> usize {
 pub fn lev_1d_vec_min(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
-    let a_len: usize = a.len();
-    let b_len: usize = b.len();
-    if a_len == 0 {
-        return b_len;
-    } else if b_len == 0 {
-        return a_len;
+    let n_a: usize = a.len();
+    let n_b: usize = b.len();
+    if n_a == 0 {
+        return n_b;
+    } else if n_b == 0 {
+        return n_a;
     }
-    let (a, b, a_len, b_len, mut matrix): (
+    let (a, b, n_a, n_b, mut matrix): (
         &[u8],
         &[u8],
         usize,
         usize,
         Vec<usize>,
     ) = {
-        if a_len < b_len {
-            (a, b, a_len, b_len, vec![0; b_len + 1])
+        if n_a < n_b {
+            (a, b, n_a, n_b, vec![0; n_b + 1])
         } else {
-            (b, a, b_len, a_len, vec![0; a_len + 1])
+            (b, a, n_b, n_a, vec![0; n_a + 1])
         }
     };
-    for j in 0..b_len {
+    for j in 0..n_b {
         matrix[j] = j;
     }
-    for i in 0..a_len {
-        let mut last_penalty = i + 1;
-        for j in 0..b_len {
-            let sub_penalty: usize = {
+    for i in 0..n_a {
+        let mut previous = i + 1;
+        for j in 0..n_b {
+            let penalty: usize = {
                 if a[i] == b[j] {
                     0
                 } else {
                     1
                 }
             };
-            let penalty: usize = (last_penalty + 1)
+            let cost: usize = (previous + 1)
                 .min(matrix[j + 1] + 1)
-                .min(matrix[j] + sub_penalty);
-            matrix[j] = last_penalty;
-            last_penalty = penalty
+                .min(matrix[j] + penalty);
+            matrix[j] = previous;
+            previous = cost
         }
-        matrix[b_len] = last_penalty
+        matrix[n_b] = previous
     }
-    matrix[b_len]
+    matrix[n_b]
 }
 
 #[must_use]
@@ -184,10 +184,10 @@ pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
                     1
                 }
             };
-            let value: usize = (matrix[select!(j, i - 1)] + 1)
+            let cost: usize = (matrix[select!(j, i - 1)] + 1)
                 .min(matrix[select!(j - 1, i)] + 1)
                 .min(matrix[select!(j - 1, i - 1)] + penalty);
-            matrix.push(value);
+            matrix.push(cost);
         }
     }
     matrix[n - 1]
@@ -198,48 +198,48 @@ pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
 pub fn lev_1d_arrayvec_min(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
-    let a_len: usize = a.len();
-    let b_len: usize = b.len();
-    if a_len == 0 {
-        return b_len;
-    } else if b_len == 0 {
-        return a_len;
+    let n_a: usize = a.len();
+    let n_b: usize = b.len();
+    if n_a == 0 {
+        return n_b;
+    } else if n_b == 0 {
+        return n_a;
     }
-    let (a, b, a_len, b_len, mut matrix): (
+    let (a, b, n_a, n_b, mut matrix): (
         &[u8],
         &[u8],
         usize,
         usize,
         ArrayVec<[usize; CAP_1D]>,
     ) = {
-        if a_len < b_len {
-            (a, b, a_len, b_len, ArrayVec::new())
+        if n_a < n_b {
+            (a, b, n_a, n_b, ArrayVec::new())
         } else {
-            (b, a, b_len, a_len, ArrayVec::new())
+            (b, a, n_b, n_a, ArrayVec::new())
         }
     };
-    for j in 0..=b_len {
+    for j in 0..=n_b {
         matrix.push(j);
     }
-    for i in 0..a_len {
-        let mut last_penalty = i + 1;
-        for j in 0..b_len {
-            let sub_penalty: usize = {
+    for i in 0..n_a {
+        let mut previous = i + 1;
+        for j in 0..n_b {
+            let penalty: usize = {
                 if a[i] == b[j] {
                     0
                 } else {
                     1
                 }
             };
-            let penalty: usize = (last_penalty + 1)
+            let cost: usize = (previous + 1)
                 .min(matrix[j + 1] + 1)
-                .min(matrix[j] + sub_penalty);
-            matrix[j] = last_penalty;
-            last_penalty = penalty
+                .min(matrix[j] + penalty);
+            matrix[j] = previous;
+            previous = cost
         }
-        matrix[b_len] = last_penalty
+        matrix[n_b] = previous
     }
-    matrix[b_len]
+    matrix[n_b]
 }
 
 #[must_use]
@@ -272,14 +272,14 @@ pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
                     1
                 }
             };
-            let value: usize = (matrix.get_unchecked(select!(j, i - 1)) + 1)
+            let cost: usize = (matrix.get_unchecked(select!(j, i - 1)) + 1)
                 .min(matrix.get_unchecked(select!(j - 1, i)) + 1)
                 .min(matrix.get_unchecked(select!(j - 1, i - 1)) + penalty);
             /* NOTE: This last `push_unchecked` has a *negative* performance
              * impact on `Darwin`. Is this a bug? On `Linux` this provides a
              * small but consistent speed increase.
              */
-            matrix.push_unchecked(value);
+            matrix.push_unchecked(cost);
         }
     }
     matrix[n - 1]
@@ -318,6 +318,55 @@ pub fn lev_1d_array(a: &str, b: &str) -> usize {
         }
     }
     matrix[n - 1]
+}
+
+#[must_use]
+#[allow(clippy::needless_range_loop)]
+pub fn lev_1d_array_min(a: &str, b: &str) -> usize {
+    let a: &[u8] = a.as_bytes();
+    let b: &[u8] = b.as_bytes();
+    let n_a: usize = a.len();
+    let n_b: usize = b.len();
+    if n_a == 0 {
+        return n_b;
+    } else if n_b == 0 {
+        return n_a;
+    }
+    let (a, b, n_a, n_b, mut matrix): (
+        &[u8],
+        &[u8],
+        usize,
+        usize,
+        [usize; CAP_1D],
+    ) = {
+        if n_a < n_b {
+            (a, b, n_a, n_b, [0; CAP_1D])
+        } else {
+            (b, a, n_b, n_a, [0; CAP_1D])
+        }
+    };
+    for j in 1..=n_b {
+        matrix[j] = j;
+    }
+    for i in 0..n_a {
+        let mut previous = i + 1;
+        for j in 0..n_b {
+            let penalty: usize = {
+                if a[i] == b[j] {
+                    0
+                } else {
+                    1
+                }
+            };
+            let cost: usize = (previous + 1)
+                .min(matrix[j + 1] + 1)
+                .min(matrix[j] + penalty);
+            matrix[j] = previous;
+            previous = cost
+        }
+        matrix[n_b] = previous
+    }
+    matrix[n_b]
 }
 
 #[must_use]
@@ -360,7 +409,7 @@ pub unsafe fn lev_1d_array_unsafe(a: &str, b: &str) -> usize {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     extern crate test;
 
     use super::*;
@@ -497,6 +546,12 @@ mod tests {
         test_lev_1d_array,
         bench_lev_1d_array_short,
         bench_lev_1d_array_long,
+    );
+    test_and_bench!(
+        lev_1d_array_min,
+        test_lev_1d_array_min,
+        bench_lev_1d_array_min_short,
+        bench_lev_1d_array_min_long,
     );
     test_and_bench_unsafe!(
         lev_1d_array_unsafe,
