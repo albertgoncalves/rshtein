@@ -1,4 +1,5 @@
 #![feature(test)]
+#![allow(clippy::needless_range_loop)]
 
 use arrayvec::ArrayVec;
 use unchecked_index::{unchecked_index, UncheckedIndex};
@@ -38,7 +39,6 @@ pub fn lev_recursive(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-#[allow(clippy::needless_range_loop)]
 pub fn lev_2d_vec(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
@@ -69,7 +69,6 @@ pub fn lev_2d_vec(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-#[allow(clippy::needless_range_loop)]
 pub fn lev_1d_vec(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
@@ -108,7 +107,6 @@ pub fn lev_1d_vec(a: &str, b: &str) -> usize {
 /* NOTE: https://github.com/crystal-lang/crystal/blob/41bd18fbea4aec50aad33aa3beb7a0bf30544186/src/levenshtein.cr#L13
  */
 #[must_use]
-#[allow(clippy::needless_range_loop)]
 pub fn lev_1d_vec_min(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
@@ -157,7 +155,6 @@ pub fn lev_1d_vec_min(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-#[allow(clippy::needless_range_loop)]
 pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
@@ -194,7 +191,6 @@ pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-#[allow(clippy::needless_range_loop)]
 pub fn lev_1d_arrayvec_min(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
@@ -243,7 +239,7 @@ pub fn lev_1d_arrayvec_min(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-#[allow(clippy::missing_safety_doc, clippy::needless_range_loop)]
+#[allow(clippy::missing_safety_doc)]
 pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
@@ -286,7 +282,6 @@ pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-#[allow(clippy::needless_range_loop)]
 pub fn lev_1d_array(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
@@ -321,7 +316,6 @@ pub fn lev_1d_array(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-#[allow(clippy::needless_range_loop)]
 pub fn lev_1d_array_min(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
@@ -370,7 +364,7 @@ pub fn lev_1d_array_min(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-#[allow(clippy::missing_safety_doc, clippy::needless_range_loop)]
+#[allow(clippy::missing_safety_doc)]
 pub unsafe fn lev_1d_array_unsafe(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
