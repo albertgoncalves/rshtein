@@ -107,7 +107,7 @@ pub fn lev_1d_vec(a: &str, b: &str) -> usize {
 /* NOTE: https://github.com/crystal-lang/crystal/blob/41bd18fbea4aec50aad33aa3beb7a0bf30544186/src/levenshtein.cr#L13
  */
 #[must_use]
-pub fn lev_1d_vec_min(a: &str, b: &str) -> usize {
+pub fn lev_1d_min_vec(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
     let n_a: usize = a.len();
@@ -191,7 +191,7 @@ pub fn lev_1d_arrayvec(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-pub fn lev_1d_arrayvec_min(a: &str, b: &str) -> usize {
+pub fn lev_1d_min_arrayvec(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
     let n_a: usize = a.len();
@@ -316,7 +316,7 @@ pub fn lev_1d_array(a: &str, b: &str) -> usize {
 }
 
 #[must_use]
-pub fn lev_1d_array_min(a: &str, b: &str) -> usize {
+pub fn lev_1d_min_array(a: &str, b: &str) -> usize {
     let a: &[u8] = a.as_bytes();
     let b: &[u8] = b.as_bytes();
     let n_a: usize = a.len();
@@ -512,10 +512,10 @@ mod test {
         bench_lev_1d_vec_long,
     );
     test_and_bench!(
-        lev_1d_vec_min,
-        test_lev_1d_vec_min,
-        bench_lev_1d_vec_min_short,
-        bench_lev_1d_vec_min_long,
+        lev_1d_min_vec,
+        test_lev_1d_min_vec,
+        bench_lev_1d_min_vec_short,
+        bench_lev_1d_min_vec_long,
     );
     test_and_bench!(
         lev_1d_arrayvec,
@@ -524,10 +524,10 @@ mod test {
         bench_lev_1d_arrayvec_long,
     );
     test_and_bench!(
-        lev_1d_arrayvec_min,
-        test_lev_1d_arrayvec_min,
-        bench_lev_1d_arrayvec_min_short,
-        bench_lev_1d_arrayvec_min_long,
+        lev_1d_min_arrayvec,
+        test_lev_1d_min_arrayvec,
+        bench_lev_1d_min_arrayvec_short,
+        bench_lev_1d_min_arrayvec_long,
     );
     test_and_bench_unsafe!(
         lev_1d_arrayvec_unsafe,
@@ -542,10 +542,10 @@ mod test {
         bench_lev_1d_array_long,
     );
     test_and_bench!(
-        lev_1d_array_min,
-        test_lev_1d_array_min,
-        bench_lev_1d_array_min_short,
-        bench_lev_1d_array_min_long,
+        lev_1d_min_array,
+        test_lev_1d_min_array,
+        bench_lev_1d_min_array_short,
+        bench_lev_1d_min_array_long,
     );
     test_and_bench_unsafe!(
         lev_1d_array_unsafe,
