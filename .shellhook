@@ -29,6 +29,7 @@ if [ ! -f .init ]; then
     rustup toolchain install nightly
     rustup component add rustfmt --toolchain nightly
     rustup component add clippy --toolchain nightly
+    rustup target add x86_64-unknown-linux-musl --toolchain=nightly
     touch .init
 fi
 
@@ -44,7 +45,14 @@ alias clippy="
         -D warnings \
         -W clippy::pedantic
 "
-alias nighttest="rustup run nightly cargo test --lib"
-alias nightbench="rustup run nightly cargo bench"
+alias nighttest="
+    rustup run nightly cargo test \
+        --target x86_64-unknown-linux-musl \
+        --lib
+"
+alias nightbench="
+    rustup run nightly cargo bench \
+        --target x86_64-unknown-linux-musl
+"
 
 set +e
