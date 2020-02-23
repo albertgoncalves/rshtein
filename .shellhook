@@ -5,7 +5,18 @@ set -e
 if [ "$(uname -s)" = "Darwin" ]; then
     alias ls="ls --color=auto"
     alias ll="ls -l"
+    alias nighttest="rustup run nightly cargo test --lib"
+    alias nightbench="rustup run nightly cargo bench"
 else
+    alias nighttest="
+        rustup run nightly cargo test \
+            --target x86_64-unknown-linux-musl \
+            --lib
+    "
+    alias nightbench="
+        rustup run nightly cargo bench \
+            --target x86_64-unknown-linux-musl
+    "
     alias open="xdg-open"
 fi
 
@@ -44,15 +55,6 @@ alias clippy="
         -- \
         -D warnings \
         -W clippy::pedantic
-"
-alias nighttest="
-    rustup run nightly cargo test \
-        --target x86_64-unknown-linux-musl \
-        --lib
-"
-alias nightbench="
-    rustup run nightly cargo bench \
-        --target x86_64-unknown-linux-musl
 "
 
 set +e
