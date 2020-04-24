@@ -405,7 +405,11 @@ pub unsafe fn lev_1d_array_unsafe(a: &str, b: &str) -> usize {
 mod test {
     extern crate test;
 
-    use super::*;
+    use super::{
+        lev_1d_array, lev_1d_array_unsafe, lev_1d_arrayvec,
+        lev_1d_arrayvec_unsafe, lev_1d_min_array, lev_1d_min_arrayvec,
+        lev_1d_min_vec, lev_1d_vec, lev_2d_vec, lev_recursive,
+    };
     use test::Bencher;
 
     macro_rules! both_ways {
