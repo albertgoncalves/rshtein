@@ -271,10 +271,7 @@ pub unsafe fn lev_1d_arrayvec_unsafe(a: &str, b: &str) -> usize {
             let cost: usize = (matrix.get_unchecked(select!(j, i - 1)) + 1)
                 .min(matrix.get_unchecked(select!(j - 1, i)) + 1)
                 .min(matrix.get_unchecked(select!(j - 1, i - 1)) + penalty);
-            /* NOTE: `push_unchecked` is *slower* than just `push` here. Is
-             * this a bug?
-             */
-            matrix.push(cost);
+            matrix.push_unchecked(cost);
         }
     }
     matrix[n - 1]
