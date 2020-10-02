@@ -5,18 +5,7 @@ set -e
 if [ "$(uname -s)" = "Darwin" ]; then
     alias ls="ls --color=auto"
     alias ll="ls -l"
-    alias nighttest="rustup run nightly cargo test --lib"
-    alias nightbench="rustup run nightly cargo bench"
 else
-    alias nighttest="
-        rustup run nightly cargo test \
-            --target x86_64-unknown-linux-musl \
-            --lib
-    "
-    alias nightbench="
-        rustup run nightly cargo bench \
-            --target x86_64-unknown-linux-musl
-    "
     alias open="xdg-open"
 fi
 
@@ -40,7 +29,6 @@ if [ ! -f .init ]; then
     rustup toolchain install nightly
     rustup component add rustfmt --toolchain nightly
     rustup component add clippy --toolchain nightly
-    rustup target add x86_64-unknown-linux-musl --toolchain=nightly
     touch .init
 fi
 
@@ -48,6 +36,8 @@ rustup update
 
 export RUSTFLAGS="-C target-cpu=native"
 
+alias nighttest="rustup run nightly cargo test --lib"
+alias nightbench="rustup run nightly cargo bench"
 alias rustfmt="rustup run nightly rustfmt -v"
 alias clippy="
     rustup run nightly cargo clippy \
