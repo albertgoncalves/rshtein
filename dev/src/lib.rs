@@ -134,7 +134,7 @@ pub fn lev_1d_min_vec(a: &str, b: &str) -> usize {
         matrix[j] = j;
     }
     for i in 0..n_a {
-        let mut previous = i + 1;
+        let mut previous: usize = i + 1;
         for j in 0..n_b {
             let penalty: usize = {
                 if a[i] == b[j] {
@@ -218,7 +218,7 @@ pub fn lev_1d_min_arrayvec(a: &str, b: &str) -> usize {
         matrix.push(j);
     }
     for i in 0..n_a {
-        let mut previous = i + 1;
+        let mut previous: usize = i + 1;
         for j in 0..n_b {
             let penalty: usize = {
                 if a[i] == b[j] {
@@ -339,7 +339,7 @@ pub fn lev_1d_min_array(a: &str, b: &str) -> usize {
         matrix[j] = j;
     }
     for i in 0..n_a {
-        let mut previous = i + 1;
+        let mut previous: usize = i + 1;
         for j in 0..n_b {
             let penalty: usize = {
                 if a[i] == b[j] {
